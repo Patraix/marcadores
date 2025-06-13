@@ -1,11 +1,13 @@
 // src/components/MatchDisplay.jsx
 import React, { useEffect, useState } from "react";
-import "./MatchDisplay.css"; // <-- Esta línea es la clave
+import "./MatchDisplay.css";
 
 const MatchDisplay = ({ data, error }) => {
-  // lastValidData ahora almacenará la estructura de objeto compleja
-  const [lastValidData, setLastValidData] = useState(null);
+  // === AÑADE ESTE CONSOLE.LOG AL PRINCIPIO DEL COMPONENTE ===
+  console.log("MatchDisplay: Data prop received from hook:", data);
+  // =========================================================
 
+  const [lastValidData, setLastValidData] = useState(null);
   // Estados de resaltado para el marcador principal
   const [highlightLocal, setHighlightLocal] = useState(false);
   const [highlightVisitor, setHighlightVisitor] = useState(false);
