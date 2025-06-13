@@ -1,47 +1,46 @@
 // src/components/MatchDisplay.jsx
 import React, { useEffect, useState } from "react";
-import "./MatchDisplay.css";
+import "./MatchDisplay.css"; // <-- Esta línea es la clave
 
 const MatchDisplay = ({ data, error }) => {
-  const [highlightLocal, setHighlightLocal] = useState(false);
-  const [highlightVisitor, setHighlightVisitor] = useState(false);
-  // Añadimos un estado para almacenar los últimos datos válidos
+  // lastValidData ahora almacenará la estructura de objeto compleja
   const [lastValidData, setLastValidData] = useState(null);
 
-  // Efecto para manejar el resaltado temporal del marcador local
-  useEffect(() => {
-    if (data?.changedScores?.local) {
-      setHighlightLocal(true);
-      const timer = setTimeout(() => setHighlightLocal(false), 2000); // Resaltar por 2 segundos
-      return () => clearTimeout(timer);
-    }
-  }, [data?.localScore, data?.changedScores?.local]);
+  // Estados de resaltado para el marcador principal
+  const [highlightLocal, setHighlightLocal] = useState(false);
+  const [highlightVisitor, setHighlightVisitor] = useState(false);
 
-  // Efecto para manejar el resaltado temporal del marcador visitante
-  useEffect(() => {
-    if (data?.changedScores?.visitor) {
-      setHighlightVisitor(true);
-      const timer = setTimeout(() => setHighlightVisitor(false), 2000); // Resaltar por 2 segundos
-      return () => clearTimeout(timer);
-    }
-  }, [data?.visitorScore, data?.changedScores?.visitor]);
-
-  // Nuevo useEffect para actualizar lastValidData solo cuando 'data' es válido
+  // Efecto para actualizar lastValidData solo cuando 'data' es válido
   useEffect(() => {
     if (data && !error) {
-      // Si hay datos y no hay error
       setLastValidData(data);
     }
-  }, [data, error]); // Depende de 'data' y 'error'
+  }, [data, error]);
 
-  // Si hay un error, mostramos el mensaje de error.
+  // Los efectos de resaltado dependen del mainScore de los datos actuales
+  useEffect(() => {
+    if (data?.mainScore?.changedScores?.local) {
+      setHighlightLocal(true);
+      const timer = setTimeout(() => setHighlightLocal(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [data?.mainScore?.localScore, data?.mainScore?.changedScores?.local]); // Depende del marcador y la bandera de cambio
+
+  useEffect(() => {
+    if (data?.mainScore?.changedScores?.visitor) {
+      setHighlightVisitor(true);
+      const timer = setTimeout(() => setHighlightVisitor(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [data?.mainScore?.visitorScore, data?.mainScore?.changedScores?.visitor]); // Depende del marcador y la bandera de cambio
+
+  // Lógica de renderizado
   if (error) {
     return <div className="match-container error">Error: {error}</div>;
   }
 
-  // Si no hay datos válidos (ni actuales ni previos), mostramos un mensaje inicial
-  // Esto solo ocurrirá en la primera carga o si no se pudo obtener ningún dato inicialmente.
-  if (!lastValidData) {
+  if (!lastValidData || !lastValidData.mainScore) {
+    // Asegúrate de que al menos el marcador principal esté disponible para mostrar algo
     return (
       <div className="match-container loading">
         Cargando resultado inicial...
@@ -49,27 +48,27 @@ const MatchDisplay = ({ data, error }) => {
     );
   }
 
-  // Si tenemos lastValidData, lo usamos para mostrar el partido
-  // El indicador 'loading' ya no bloqueará la visualización.
-  const displayData = lastValidData;
+  const { mainScore, matchStatus, comments } = lastValidData;
 
   return (
     <div className="match-container">
-      <h1 className="match-title">Resultado del Partido</h1>
+      <h1 className=".pure-g">Marcador</h1>
+
+      {/* Marcador Principal */}
       <div className="teams">
         <span className="team-name">
-          {displayData.localTeam || "Equipo Local"}
+          {mainScore.localTeam || "Equipo Local"}
         </span>
         <span className="separator">-</span>
         <span className="team-name">
-          {displayData.visitorTeam || "Equipo Visitante"}
+          {mainScore.visitorTeam || "Equipo Visitante"}
         </span>
       </div>
       <div className="score">
         <span
           className={`score-number ${highlightLocal ? "highlight-score" : ""}`}
         >
-          {displayData.localScore !== undefined ? displayData.localScore : "-"}
+          {mainScore.localScore !== undefined ? mainScore.localScore : "-"}
         </span>
         <span className="score-separator">:</span>
         <span
@@ -77,11 +76,29 @@ const MatchDisplay = ({ data, error }) => {
             highlightVisitor ? "highlight-score" : ""
           }`}
         >
-          {displayData.visitorScore !== undefined
-            ? displayData.visitorScore
-            : "-"}
+          {mainScore.visitorScore !== undefined ? mainScore.visitorScore : "-"}
         </span>
       </div>
+      <p>🗓{matchStatus.day || "N/A"}</p>
+      <p>⌚︎{matchStatus.time || "N/A"}</p>
+      {/* Información del Estado del Partido (Fila 2) */}
+      {matchStatus && (
+        <div className="match-status">
+          <p className="status-text">{matchStatus.statusText || "N/A"}</p>
+        </div>
+      )}
+
+      {/* Comentarios (desde Fila 3 en adelante) */}
+      {comments && comments.length > 0 && (
+        <div className="match-comments">
+          {/* <h3>Comentarios del Partido:</h3>*/}
+          <ul className="comments-list">
+            {comments.map((comment, index) => (
+              <li key={index}>{comment}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

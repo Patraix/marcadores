@@ -1,80 +1,219 @@
 /* src/components/MatchDisplay.css */
+
+/* Contenedor principal del partido */
 .match-container {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-    border: 2px solid #3498db;
-    border-radius: 10px;
-    max-width: 400px;
-    margin: 50px auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background-color: #f9f9f9;
+    background-color: #ffffff; /* Fondo blanco para el contenedor */
+    border-radius: 12px; /* Esquinas redondeadas */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    padding: 30px; /* Espaciado interno */
+    margin: 20px; /* Margen externo */
+    width: 100%;
+    max-width: 450px; /* Ancho máximo para que no sea demasiado grande en pantallas amplias */
+    text-align: center; /* Centrar el contenido */
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #333333; /* Color de texto oscuro */
+    transition: all 0.3s ease-in-out; /* Transición suave para cualquier cambio */
 }
 
-.match-container.loading,
-.match-container.error,
-.match-container.no-data {
-    border-color: #e74c3c;
-    color: #e74c3c;
-}
-
+/* Título del partido */
 .match-title {
-    color: #2c3e50;
-    margin-bottom: 20px;
+    font-size: 2.2em; /* Tamaño de fuente grande */
+    color: #2c3e50; /* Azul oscuro */
+    margin-bottom: 25px; /* Espacio debajo del título */
+    font-weight: 700; /* Negrita */
 }
 
+/* Sección de equipos */
 .teams {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 15px;
+    gap: 15px; /* Espacio entre los nombres de equipo */
+    margin-bottom: 20px; /* Espacio debajo de los equipos */
 }
 
 .team-name {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #34495e;
-    margin: 0 10px;
+    font-size: 1.6em; /* Tamaño de fuente para nombres de equipo */
+    font-weight: 600; /* Semi-negrita */
+    color: #697480; /* Gris azulado oscuro */
+    text-transform: uppercase; /* Mayúsculas */ 
 }
 
 .separator {
-    font-size: 1.5em;
-    color: #7f8c8d;
+    font-size: 1.8em; /* Tamaño del guion separador */
+    color: #95a5a6; /* Gris medio */
+    font-weight: 300;
 }
 
+/* Sección del marcador */
 .score {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Espacio entre los números del marcador */
+    margin-bottom: 25px; /* Espacio debajo del marcador */
+}
+
+.score-number {
+    font-size: 3.5em; /* Tamaño de fuente muy grande para los números */
+    font-weight: 800; /* Extra-negrita */
+    color: #2980b9; /* Azul vibrante */
+    min-width: 60px; /* Ancho mínimo para mantener el formato */
+    text-align: center;
+}
+
+.score-separator {
+    font-size: 3em; /* Tamaño del separador de marcador (:) */
+    color: #7f8c8d; /* Gris oscuro */
+}
+
+/* Resaltado del marcador al cambiar */
+.highlight-score {
+    animation: pulse 0.8s ease-out; /* Animación de pulsación */
+    background-color: #e6f7ff; /* Fondo claro al resaltar */
+    border-radius: 8px;
+    padding: 0 10px;
+}
+
+/* Animación de pulsación para el resaltado */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Mensajes de carga o error */
+.match-container.loading,
+.match-container.error,
+.match-container.no-data {
+    padding: 30px;
+    font-size: 1.2em;
+    font-weight: 500;
+    color: #555555;
+    background-color: #f8f8f8;
+    border: 1px dashed #cccccc;
+    min-height: 150px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.score-number {
-    font-size: 3em;
+.match-container.error {
+    color: #c0392b; /* Rojo para errores */
+    background-color: #fdeaea;
+    border-color: #e74c3c;
+}
+
+/* Estilos para la información del estado del partido (fila 2) */
+.match-status {
+    margin-top: 25px;
+    padding: 15px;
+    background-color: #f0f4f7; /* Un color de fondo suave */
+    border-radius: 8px;
+    font-size: 0.95em;
+    color: #555555;
+    border: 1px solid #e0e6eb;
+}
+
+.match-status p {
+    margin: 5px 0;
+    line-height: 1.5;
+}
+
+.match-status .status-text {
     font-weight: bold;
-    color: #27ae60; /* Color normal del marcador */
-    padding: 5px 15px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    color: #d38604;
+    font-size: 1.1em;
+    text-transform: uppercase;
 }
 
-.score-separator {
-    font-size: 3em;
-    color: #7f8c8d;
-    margin: 0 10px;
+/* Estilos para los comentarios del partido (fila 3 en adelante) */
+.match-comments {
+    margin-top: 30px;
+    text-align: left; /* Alinea el texto a la izquierda para los comentarios */
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0; /* Separador superior */
 }
 
-/* Estilo para el resaltado temporal */
-.highlight-score {
-    background-color: #f39c12; /* Color de fondo para resaltar */
-    color: white; /* Color del texto resaltado */
-    animation: pulse 1s ease-in-out infinite alternate; /* Animación de pulsación */
+.match-comments h3 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.4em;
+    font-weight: 600;
 }
 
-@keyframes pulse {
-    from {
-        box-shadow: 0 0 0px 0px rgba(243, 156, 18, 0.7);
+.comments-list {
+    list-style: none; /* Elimina los puntos de lista predeterminados */
+    padding: 0;
+    margin: 0;
+}
+
+.comments-list li {
+    background-color: #f9f9f9; /* Fondo ligero para cada comentario */
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-size: 0.95em;
+    color: #444444;
+    line-height: 1.5;
+    border: 1px solid #eeeeee;
+    transition: background-color 0.2s ease;
+}
+
+.comments-list li:hover {
+    background-color: #f0f0f0; /* Ligero cambio al pasar el ratón */
+}
+
+/* Media Queries para responsividad básica */
+@media (max-width: 600px) {
+    .match-container {
+        padding: 20px;
+        margin: 15px;
+        border-radius: 8px;
     }
-    to {
-        box-shadow: 0 0 10px 5px rgba(243, 156, 18, 0.7);
+
+    .match-title {
+        font-size: 1.8em;
+        margin-bottom: 20px;
+    }
+
+    .team-name {
+        font-size: 1.3em;
+    }
+
+    .separator {
+        font-size: 1.5em;
+    }
+
+    .score-number {
+        font-size: 2.8em;
+        min-width: 50px;
+    }
+
+    .score-separator {
+        font-size: 2.5em;
+    }
+
+    .match-status {
+        padding: 10px;
+    }
+
+    .match-comments h3 {
+        font-size: 1.2em;
+    }
+
+    .comments-list li {
+        padding: 8px 10px;
+        font-size: 0.9em;
     }
 }
