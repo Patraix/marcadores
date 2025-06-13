@@ -1,0 +1,34 @@
+/* src/App.css */
+.App {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.home-page, .not-found-page {
+    text-align: center;
+    padding: 20px;
+    border: 2px solid #2980b9;
+    border-radius: 10px;
+    max-width: 500px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.home-page h2, .not-found-page h2 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.home-page p, .not-found-page p {
+    color: #34495e;
+    line-height: 1.6;
+}
+
+.home-page code {
+    background-color: #e0e0e0;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-family: monospace;
+}
