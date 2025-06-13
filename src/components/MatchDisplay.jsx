@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import "./MatchDisplay.css";
 
-const MatchDisplay = ({ data, loading, error }) => {
+const MatchDisplay = ({ data, error }) => {
   const [highlightLocal, setHighlightLocal] = useState(false);
   const [highlightVisitor, setHighlightVisitor] = useState(false);
   // Añadimos un estado para almacenar los últimos datos válidos
