@@ -217,3 +217,41 @@
         font-size: 0.9em;
     }
 }
+/* src/components/MatchDisplay.css */
+
+/* ... (mantén todos tus estilos existentes para .match-container, .match-title, .teams, .score, etc.) ... */
+
+/* Estilos para el indicador LIVE */
+.live-indicator {
+    display: flex; /* Para alinear el icono y el texto */
+    align-items: center; /* Centrar verticalmente */
+    justify-content: center; /* Centrar horizontalmente */
+    margin-bottom: 20px; /* Espacio debajo del indicador */
+    font-size: 1.2em; /* Tamaño de fuente para "EN VIVO" */
+    font-weight: bold;
+    text-transform: uppercase;
+    gap: 5px; /* Espacio entre el icono y el texto */
+}
+
+/* Estilos para el icono parpadeante */
+.live-icon {
+    font-size: 2em; /* Tamaño del icono de punto */
+    animation: blink 0.8s infinite alternate; /* Aplica la animación */
+    /* animation: blink 1.2s cubic-bezier(0.4, 0, 1, 1) infinite alternate; // Versión con easing */
+}
+
+/* Definición de la animación de parpadeo */
+@keyframes blink {
+    0% {
+        opacity: 1; /* Completamente visible */
+    }
+    100% {
+        opacity: 0.2; /* Casi transparente */
+    }
+}
+.match-datetime {
+    font-size: 0.9em;
+    color: #7f8c8d;
+    margin-top: -10px; /* Acercar a la sección de marcador/estado */
+    margin-bottom: 20px;
+}   

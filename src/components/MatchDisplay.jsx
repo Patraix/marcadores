@@ -1,6 +1,7 @@
 // src/components/MatchDisplay.jsx
 import React, { useEffect, useState } from "react";
 import "./MatchDisplay.css";
+import { CiStreamOn } from "react-icons/ci";
 
 const MatchDisplay = ({ data, error }) => {
   // === AÑADE ESTE CONSOLE.LOG AL PRINCIPIO DEL COMPONENTE ===
@@ -54,8 +55,11 @@ const MatchDisplay = ({ data, error }) => {
 
   return (
     <div className="match-container">
-      <h1 className=".pure-g">Marcador</h1>
-
+      {" "}
+      <div className=".pure-g live-indicator">
+        <CiStreamOn className="live-icon" /> {/* El componente de icono */}
+        <span className="live-text">MARCADOR EN VIVO</span>
+      </div>
       {/* Marcador Principal */}
       <div className="teams">
         <span className="team-name">
@@ -81,15 +85,15 @@ const MatchDisplay = ({ data, error }) => {
           {mainScore.visitorScore !== undefined ? mainScore.visitorScore : "-"}
         </span>
       </div>
-      <p>🗓{matchStatus.day || "N/A"}</p>
-      <p>⌚︎{matchStatus.time || "N/A"}</p>
+      <p className="match-datetime">
+        🗓 {matchStatus.day || "N/A"} ⌚︎ {matchStatus.time || "N/A"}
+      </p>
       {/* Información del Estado del Partido (Fila 2) */}
       {matchStatus && (
         <div className="match-status">
           <p className="status-text">{matchStatus.statusText || "N/A"}</p>
         </div>
       )}
-
       {/* Comentarios (desde Fila 3 en adelante) */}
       {comments && comments.length > 0 && (
         <div className="match-comments">
