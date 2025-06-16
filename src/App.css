@@ -1,34 +1,70 @@
 /* src/App.css */
-.App {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 
-.home-page, .not-found-page {
+/* Contenedor general de la aplicación */
+.app-container {
+    padding: 15px; /* Un poco menos de padding general */
     text-align: center;
-    padding: 20px;
-    border: 2px solid #2980b9;
-    border-radius: 10px;
-    max-width: 500px;
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 1200px; /* Ancho máximo para la lista de marcadores */
+    margin: 0 auto;
+    box-sizing: border-box; /* Asegura que el padding no cause desbordamiento */
 }
 
-.home-page h2, .not-found-page h2 {
+/* Título principal de la jornada */
+.main-app-title {
+    font-size: 2.2em; /* Un poco más pequeño para empezar */
     color: #2c3e50;
-    margin-bottom: 15px;
+    margin-bottom: 30px;
+    font-weight: 700;
 }
 
-.home-page p, .not-found-page p {
+/* El contenedor principal de los marcadores usará las clases de Pure.css */
+/* La clase 'pure-g' establece un contexto de cuadrícula */
+.match-list.pure-g {
+    /* Pure.css ya maneja el display y la envoltura */
+    gap: 20px; /* Espacio entre los marcadores. Pure.css tiene un gap por defecto, pero puedes ajustar */
+    justify-content: center; /* Centra los marcadores si no llenan la fila */
+}
+
+/* Estilos para los mensajes de carga/error/sin datos de la jornada */
+.app-container.loading,
+.app-container.error,
+.app-container.no-data,
+.app-container.not-found-page {
+    font-size: 1.2em; /* Un poco más pequeño */
+    padding: 30px; /* Menos padding */
+    border: 2px dashed #ccc;
+    border-radius: 8px; /* Bordes un poco más suaves */
+    background-color: #f0f0f0;
+    margin-top: 30px;
+    color: #555555;
+    text-align: center;
+}
+.app-container.error {
+    color: #e74c3c;
+    border-color: #e74c3c;
+    background-color: #fdeaea;
+}
+.app-container.not-found-page h2 {
+    color: #e74c3c;
+    margin-bottom: 10px;
+    font-size: 1.5em;
+}
+.app-container.not-found-page p {
     color: #34495e;
-    line-height: 1.6;
 }
 
-.home-page code {
-    background-color: #e0e0e0;
-    padding: 2px 5px;
-    border-radius: 3px;
-    font-family: monospace;
+/* Media Queries para ajustar el título principal */
+@media (max-width: 768px) {
+    .main-app-title {
+        font-size: 1.8em;
+        margin-bottom: 25px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-app-title {
+        font-size: 1.5em;
+        margin-bottom: 20px;
+    }
 }

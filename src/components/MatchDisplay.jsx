@@ -1,105 +1,126 @@
 // src/components/MatchDisplay.jsx
 import React, { useEffect, useState } from "react";
 import "./MatchDisplay.css";
-import { CiStreamOn } from "react-icons/ci";
+import { CiStreamOn } from "react-icons/ci"; // Icono de "Stream On"
 
-const MatchDisplay = ({ data, error }) => {
-  // === AÑADE ESTE CONSOLE.LOG AL PRINCIPIO DEL COMPONENTE ===
+const MatchDisplay = ({ data, error, matchName }) => {
+  // Console log para depuración (puedes mantenerlo o quitarlo)
   console.log("MatchDisplay: Data prop received from hook:", data);
-  // =========================================================
+  console.log("MatchDisplay: Error prop received from hook:", error);
 
   const [lastValidData, setLastValidData] = useState(null);
-  // Estados de resaltado para el marcador principal
+  // Reintroducimos los estados locales para controlar el resaltado de cada marcador
   const [highlightLocal, setHighlightLocal] = useState(false);
   const [highlightVisitor, setHighlightVisitor] = useState(false);
 
-  // Efecto para actualizar lastValidData solo cuando 'data' es válido
+  // Efecto para actualizar lastValidData solo cuando 'data' es válido y sin errores.
+  // Esto asegura que 'lastValidData' siempre retenga la última versión buena del marcador,
+  // incluso si la siguiente petición falla o está en curso.
   useEffect(() => {
     if (data && !error) {
       setLastValidData(data);
     }
   }, [data, error]);
 
-  // Los efectos de resaltado dependen del mainScore de los datos actuales
+  // Efecto para el resaltado del marcador local
   useEffect(() => {
+    // Si la bandera 'changedScores.local' está en los datos, activa el resaltado
     if (data?.mainScore?.changedScores?.local) {
       setHighlightLocal(true);
-      const timer = setTimeout(() => setHighlightLocal(false), 2000);
-      return () => clearTimeout(timer);
+      // Configura el temporizador para que el resaltado (marco y parpadeo) dure 30 segundos (30000 ms)
+      const timer = setTimeout(() => setHighlightLocal(false), 30000);
+      return () => clearTimeout(timer); // Limpia el temporizador si el componente se desmonta o el efecto se re-ejecuta
     }
-  }, [data?.mainScore?.localScore, data?.mainScore?.changedScores?.local]); // Depende del marcador y la bandera de cambio
+  }, [data?.mainScore?.localScore, data?.mainScore?.changedScores?.local]); // Dependencias: marcador y bandera de cambio
 
+  // Efecto para el resaltado del marcador visitante
   useEffect(() => {
+    // Si la bandera 'changedScores.visitor' está en los datos, activa el resaltado
     if (data?.mainScore?.changedScores?.visitor) {
       setHighlightVisitor(true);
-      const timer = setTimeout(() => setHighlightVisitor(false), 2000);
-      return () => clearTimeout(timer);
+      // Configura el temporizador para que el resaltado (marco y parpadeo) dure 30 segundos (30000 ms)
+      const timer = setTimeout(() => setHighlightVisitor(false), 30000);
+      return () => clearTimeout(timer); // Limpia el temporizador si el componente se desmonta o el efecto se re-ejecuta
     }
-  }, [data?.mainScore?.visitorScore, data?.mainScore?.changedScores?.visitor]); // Depende del marcador y la bandera de cambio
+  }, [data?.mainScore?.visitorScore, data?.mainScore?.changedScores?.visitor]); // Dependencias: marcador y bandera de cambio
 
-  // Lógica de renderizado
-  if (error) {
-    return <div className="match-container error">Error: {error}</div>;
-  }
+  // Lógica de renderizado ajustada para mostrar siempre la estructura
+  // Se usan valores por defecto si 'lastValidData' es null (primera carga sin caché, o error persistente)
+  const { mainScore, matchStatus, comments } = lastValidData || {};
 
-  if (!lastValidData || !lastValidData.mainScore) {
-    // Asegúrate de que al menos el marcador principal esté disponible para mostrar algo
-    return (
-      <div className="match-container loading">
-        Cargando resultado inicial...
-      </div>
-    );
-  }
-
-  const { mainScore, matchStatus, comments } = lastValidData;
+  // Aseguramos que los objetos anidados y arrays estén definidos para evitar errores de acceso a propiedades
+  const displayMainScore = mainScore || {};
+  const displayMatchStatus = matchStatus || {};
+  const displayComments = comments || [];
 
   return (
     <div className="match-container">
-      {" "}
-      <div className=".pure-g live-indicator">
-        <CiStreamOn className="live-icon" /> {/* El componente de icono */}
+      {/* Título del partido: Muestra los nombres de los equipos. */}
+      <h1 className="match-title">
+        {displayMainScore.localTeam || "Local"} vs{" "}
+        {displayMainScore.visitorTeam || "Visitante"}
+      </h1>
+
+      {/* Indicador "LIVE" - siempre visible */}
+      <div className="live-indicator">
+        <CiStreamOn className="live-icon" />
         <span className="live-text">MARCADOR EN VIVO</span>
       </div>
-      {/* Marcador Principal */}
+
+      {/* Nombres de los equipos */}
       <div className="teams">
         <span className="team-name">
-          {mainScore.localTeam || "Equipo Local"}
+          {displayMainScore.localTeam || "Equipo Local"}
         </span>
         <span className="separator">-</span>
         <span className="team-name">
-          {mainScore.visitorTeam || "Equipo Visitante"}
+          {displayMainScore.visitorTeam || "Equipo Visitante"}
         </span>
       </div>
+
+      {/* Sección del marcador */}
       <div className="score">
+        {/* Marcador Local: aplica la clase highlight-score si highlightLocal es true */}
         <span
           className={`score-number ${highlightLocal ? "highlight-score" : ""}`}
         >
-          {mainScore.localScore !== undefined ? mainScore.localScore : "-"}
+          {displayMainScore.localScore !== undefined
+            ? displayMainScore.localScore
+            : "-"}
         </span>
         <span className="score-separator">:</span>
+        {/* Marcador Visitante: aplica la clase highlight-score si highlightVisitor es true */}
         <span
           className={`score-number ${
             highlightVisitor ? "highlight-score" : ""
           }`}
         >
-          {mainScore.visitorScore !== undefined ? mainScore.visitorScore : "-"}
+          {displayMainScore.visitorScore !== undefined
+            ? displayMainScore.visitorScore
+            : "-"}
         </span>
       </div>
+
+      {/* Fecha y hora del partido */}
       <p className="match-datetime">
-        🗓 {matchStatus.day || "N/A"} ⌚︎ {matchStatus.time || "N/A"}
+        🗓 {displayMatchStatus.day || "N/A"} ⌚︎{" "}
+        {displayMatchStatus.time || "N/A"}
       </p>
-      {/* Información del Estado del Partido (Fila 2) */}
-      {matchStatus && (
+
+      {/* Información del Estado del Partido */}
+      {displayMatchStatus && (
         <div className="match-status">
-          <p className="status-text">{matchStatus.statusText || "N/A"}</p>
+          <p className="status-text">
+            {displayMatchStatus.statusText || "N/A"}
+          </p>
         </div>
       )}
-      {/* Comentarios (desde Fila 3 en adelante) */}
-      {comments && comments.length > 0 && (
+
+      {/* Comentarios del Partido */}
+      {displayComments.length > 0 && (
         <div className="match-comments">
-          {/* <h3>Comentarios del Partido:</h3>*/}
           <ul className="comments-list">
-            {comments.map((comment, index) => (
+            {displayComments.map((comment, index) => (
               <li key={index}>{comment}</li>
             ))}
           </ul>

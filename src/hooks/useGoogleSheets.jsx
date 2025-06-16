@@ -2,66 +2,83 @@
 import { useState, useEffect, useRef } from "react";
 
 const API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY;
-const SHEET_ID = import.meta.env.VITE_GOOGLE_SHEET_ID;
 
-export const useGoogleSheets = (sheetName, interval = 5000) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+// El hook ya NO acepta onScoreChange como argumento, ya que MatchDisplay lo gestiona localmente
+export const useGoogleSheets = (sheetId, sheetName, interval = 5000) => {
+  const [data, setData] = useState(() => {
+    // Intenta cargar datos desde localStorage al inicializar el estado
+    const cachedData = localStorage.getItem(
+      `matchData-${sheetId}-${sheetName}`
+    );
+    return cachedData ? JSON.parse(cachedData) : null;
+  });
+  // El estado 'loading' indica si hay una petición en curso.
+  // Se inicializa a true solo si NO hay datos en caché.
+  const [loading, setLoading] = useState(!data);
   const [error, setError] = useState(null);
-  const prevDataRef = useRef(null);
+  const prevDataRef = useRef(null); // Para almacenar los datos de la petición anterior
+
+  const cacheKey = `matchData-${sheetId}-${sheetName}`; // Clave única para localStorage de cada partido
 
   useEffect(() => {
-    if (!sheetName) {
+    // Valida que el ID de la hoja y el nombre de la pestaña estén presentes
+    if (!sheetId || !sheetName) {
       setData(null);
       setLoading(false);
-      setError("No sheetName provided.");
+      setError("Sheet ID or Sheet Name not provided for the hook.");
       return;
     }
 
     const fetchData = async () => {
-      setLoading(true);
+      // Activa el indicador de carga solo si el estado actual de 'data' es null
+      // (es decir, no hay datos iniciales de caché o se ha reseteado).
+      if (!data) {
+        setLoading(true);
+      }
+
       try {
+        // Construye la URL de la API de Google Sheets
         const range = `${sheetName}!A:D`;
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${API_KEY}`;
 
         const response = await fetch(url);
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          // Si la respuesta HTTP no es exitosa, lanza un error
+          throw new Error(
+            `HTTP error! status: ${response.status} for sheet ${sheetName}`
+          );
         }
         const result = await response.json();
 
-        const rawRows = result.values || []; // Todas las filas obtenidas
+        const rawRows = result.values || []; // Obtiene todas las filas de la respuesta
 
-        // === AÑADE ESTE CONSOLE.LOG AQUÍ ===
         console.log(
-          "useGoogleSheets: Raw rows directly from Google Sheets API:",
+          `useGoogleSheets(${sheetName}): Raw rows directly from Google Sheets API:`,
           rawRows
         );
-        // ===================================
 
+        // Objeto para almacenar los datos formateados del partido
         let newFormattedData = {
           mainScore: null,
           matchStatus: null,
           comments: [],
         };
 
-        // 1. Procesar la primera fila (Marcador Principal)
+        // Procesamiento de la primera fila (marcador principal)
         if (rawRows.length > 0 && rawRows[0].length >= 4) {
           newFormattedData.mainScore = {
             localTeam: rawRows[0][0],
-            visitorTeam: rawRows[0][1],
-            localScore: parseInt(rawRows[0][2], 10),
+            visitorTeam: rawRows[0][2],
+            localScore: parseInt(rawRows[0][1], 10),
             visitorScore: parseInt(rawRows[0][3], 10),
           };
         } else {
-          // === AÑADE ESTE CONSOLE.LOG AQUÍ ===
           console.warn(
-            "useGoogleSheets: Primera fila no tiene suficientes datos o no existe para mainScore."
+            `useGoogleSheets(${sheetName}): Primera fila no tiene suficientes datos o no existe para mainScore.`
           );
-          // ===================================
         }
 
-        // 2. Procesar la segunda fila (Estado del Partido)
+        // Procesamiento de la segunda fila (estado del partido)
         if (rawRows.length > 1 && rawRows[1].length >= 3) {
           newFormattedData.matchStatus = {
             day: rawRows[1][0],
@@ -69,24 +86,24 @@ export const useGoogleSheets = (sheetName, interval = 5000) => {
             statusText: rawRows[1][2],
           };
         } else {
-          // === AÑADE ESTE CONSOLE.LOG AQUÍ ===
           console.warn(
-            "useGoogleSheets: Segunda fila no tiene suficientes datos o no existe para matchStatus."
+            `useGoogleSheets(${sheetName}): Segunda fila no tiene suficientes datos o no existe para matchStatus.`
           );
-          // ===================================
         }
 
-        // 3. Procesar las filas de comentarios (desde la tercera fila en adelante)
+        // Procesamiento de las filas de comentarios (desde la tercera fila en adelante)
         for (let i = 2; i < rawRows.length; i++) {
           const row = rawRows[i];
+          // Detiene la lectura si encuentra una fila completamente vacía (columna A vacía)
           if (!row || row.length === 0 || !row[0]) {
             break;
           }
           newFormattedData.comments.push(row[0]);
         }
 
-        // Detección de cambios (el resto de tu lógica de cambio)
+        // Lógica de detección de cambio de marcador para activar el resaltado
         let changedScores = {};
+        // Compara los nuevos datos con los datos previos almacenados en useRef
         if (
           newFormattedData.mainScore &&
           prevDataRef.current &&
@@ -105,34 +122,49 @@ export const useGoogleSheets = (sheetName, interval = 5000) => {
             changedScores.visitor = true;
           }
         }
+        // Adjunta las banderas 'changedScores' al objeto mainScore
         newFormattedData.mainScore = newFormattedData.mainScore
           ? { ...newFormattedData.mainScore, changedScores }
           : null;
 
-        // === AÑADE ESTE CONSOLE.LOG AQUÍ ===
         console.log(
-          "useGoogleSheets: Formatted data being set to state:",
+          `useGoogleSheets(${sheetName}): Formatted data being set to state:`,
           newFormattedData
         );
-        // ===================================
 
-        setData(newFormattedData);
-        prevDataRef.current = newFormattedData;
+        setData(newFormattedData); // Actualiza el estado con los nuevos datos
+        prevDataRef.current = newFormattedData; // Actualiza la referencia a los datos previos
 
-        setError(null);
+        // Guarda los nuevos datos en localStorage para caché
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(newFormattedData));
+        } catch (e) {
+          console.error("Error saving to localStorage:", e);
+        }
+
+        setError(null); // Limpia cualquier error anterior
       } catch (err) {
-        console.error("Error fetching sheet data:", err);
+        console.error(`Error fetching sheet data for ${sheetName}:`, err);
         setError(err.message || "Failed to fetch data.");
-        setData(null);
+        // Si la petición falla y no hay datos en caché, el estado 'data' podría quedar nulo.
+        // Si había datos en caché, se mantienen visibles.
+        if (!data) {
+          setData(null);
+        }
       } finally {
-        setLoading(false);
+        setLoading(false); // Siempre finaliza el estado de carga
       }
     };
 
+    // Ejecuta fetchData la primera vez y luego establece el polling
     fetchData();
     const pollInterval = setInterval(fetchData, interval);
-    return () => clearInterval(pollInterval);
-  }, [sheetName, interval]);
+
+    // Función de limpieza para detener el polling cuando el componente se desmonta o las dependencias cambian
+    return () => {
+      clearInterval(pollInterval);
+    };
+  }, [sheetId, sheetName, interval]); // Dependencias del useEffect
 
   return { data, loading, error };
 };
