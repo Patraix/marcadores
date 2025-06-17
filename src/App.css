@@ -2,28 +2,43 @@
 
 /* Contenedor general de la aplicación */
 .app-container {
-    padding: 15px; /* Un poco menos de padding general */
+    padding: 15px;
     text-align: center;
     width: 100%;
     max-width: 1200px; /* Ancho máximo para la lista de marcadores */
     margin: 0 auto;
-    box-sizing: border-box; /* Asegura que el padding no cause desbordamiento */
+    box-sizing: border-box;
+    display: flex; /* Usamos flexbox para centrar el contenido */
+    flex-direction: column; /* Apila el contenido verticalmente */
+    align-items: center; /* Centra horizontalmente los elementos hijos (incluyendo el logo) */
+}
+
+/* Estilos para el logo de la aplicación */
+.app-logo {
+    width: 50%; /* El logo ocupará el 50% del ancho del contenedor padre */
+    height: auto; /* Mantiene la proporción */
+    margin-bottom: 20px; /* Espacio debajo del logo */
+    display: block; /* Asegura que no haya espacio extra debajo de la imagen y permite margin:auto */
+    /* Como el padre (.app-container) ya usa align-items: center con flex-direction: column,
+       el margin: 0 auto no es estrictamente necesario para centrar horizontalmente,
+       pero es buena práctica mantenerlo para claridad y compatibilidad. */
+    /* max-width se ha eliminado ya que width: 50% ya define el tamaño relativo */
 }
 
 /* Título principal de la jornada */
 .main-app-title {
-    font-size: 2.2em; /* Un poco más pequeño para empezar */
-    color: #2c3e50;
+    font-size: 2.2em;
+    color: #ffffff;
     margin-bottom: 30px;
     font-weight: 700;
 }
 
 /* El contenedor principal de los marcadores usará las clases de Pure.css */
-/* La clase 'pure-g' establece un contexto de cuadrícula */
 .match-list.pure-g {
-    /* Pure.css ya maneja el display y la envoltura */
-    gap: 20px; /* Espacio entre los marcadores. Pure.css tiene un gap por defecto, pero puedes ajustar */
-    justify-content: center; /* Centra los marcadores si no llenan la fila */
+    gap: 20px;
+    justify-content: center;
+    display: flex; 
+    flex-wrap: wrap; 
 }
 
 /* Estilos para los mensajes de carga/error/sin datos de la jornada */
@@ -31,10 +46,10 @@
 .app-container.error,
 .app-container.no-data,
 .app-container.not-found-page {
-    font-size: 1.2em; /* Un poco más pequeño */
-    padding: 30px; /* Menos padding */
+    font-size: 1.2em;
+    padding: 30px;
     border: 2px dashed #ccc;
-    border-radius: 8px; /* Bordes un poco más suaves */
+    border-radius: 8px;
     background-color: #f0f0f0;
     margin-top: 30px;
     color: #555555;
@@ -54,8 +69,11 @@
     color: #34495e;
 }
 
-/* Media Queries para ajustar el título principal */
+/* Media Queries para ajustar el título principal y el logo */
 @media (max-width: 768px) {
+    .app-logo {
+        width: 60%; /* Ajuste para pantallas medianas, un poco más grande */
+    }
     .main-app-title {
         font-size: 1.8em;
         margin-bottom: 25px;
@@ -63,6 +81,10 @@
 }
 
 @media (max-width: 480px) {
+    .app-logo {
+        width: 75%; /* Más grande en móviles para mejor visibilidad */
+        margin-bottom: 15px;
+    }
     .main-app-title {
         font-size: 1.5em;
         margin-bottom: 20px;
