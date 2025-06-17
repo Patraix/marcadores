@@ -17,5 +17,6 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(137deg,rgba(155, 42, 85, 1) 0%, rgba(193, 87, 199, 0.15) 100%, rgba(237, 221, 83, 0.15) 100%);
+    background: #060c21;
+background: linear-gradient(155deg,rgba(6, 12, 33, 1) 0%, rgba(163, 83, 237, 1) 100%);
 }

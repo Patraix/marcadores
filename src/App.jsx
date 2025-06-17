@@ -9,6 +9,7 @@ import {
 import { useGoogleSheets } from "./hooks/useGoogleSheets.jsx"; // Hook para leer datos de Google Sheets
 import MatchDisplay from "./components/MatchDisplay.jsx"; // Componente para mostrar un partido
 import "./App.css"; // Estilos generales para el contenedor de la aplicación
+import LogoImage from "./assets/logocrews.png"; // <--- Importa tu logo desde la carpeta assets
 
 // Importa las variables de entorno
 const API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY;
@@ -17,19 +18,16 @@ const MAIN_INDEX_SHEET_ID = import.meta.env.VITE_MAIN_INDEX_SHEET_ID;
 /**
  * MatchWrapper Componente
  * Este componente es un wrapper para cada MatchDisplay.
- * Ya no gestiona el resaltado global, cada MatchDisplay lo gestiona localmente.
  *
  * @param {string} matchSheetId - El ID de la hoja de Google Sheets que contiene este partido.
  * @param {string} matchSheetName - El nombre de la pestaña (sheet) dentro de esa hoja que corresponde a este partido.
  */
 function MatchWrapper({ matchSheetId, matchSheetName }) {
-  // activeHighlight y triggerGlobalHighlight ELIMINADOS
   // Cada MatchWrapper utiliza el hook useGoogleSheets para obtener los datos de SU partido.
   const { data, loading, error } = useGoogleSheets(
     matchSheetId,
     matchSheetName,
     5000 // Polling cada 5 segundos
-    // onScoreChange callback ELIMINADO de aquí
   );
 
   // Muestra el MatchDisplay siempre. MatchDisplay ahora maneja si mostrar datos o valores por defecto.
@@ -39,7 +37,6 @@ function MatchWrapper({ matchSheetId, matchSheetName }) {
         data={data}
         error={error}
         matchName={matchSheetName} // Pasamos el nombre del partido para el título
-        // activeHighlight ELIMINADO de aquí
       />
     </div>
   );
@@ -48,7 +45,6 @@ function MatchWrapper({ matchSheetId, matchSheetName }) {
 /**
  * App Componente
  * Orquesta la carga de los múltiples marcadores.
- * La gestión del resaltado ya NO es global aquí.
  */
 function App() {
   const { indexSheetName = "JornadaActual" } = useParams();
@@ -57,11 +53,6 @@ function App() {
   const [sheetNames, setSheetNames] = useState([]);
   const [loadingIndex, setLoadingIndex] = useState(true);
   const [errorIndex, setErrorIndex] = useState(null);
-
-  // === ESTADO GLOBAL DE RESALTADO ELIMINADO DE AQUÍ ===
-  // const [activeHighlight, setActiveHighlight] = useState(null);
-  // const highlightTimeoutRef = useRef(null);
-  // const triggerGlobalHighlight = useCallback((matchName, scoreType) => { ... }, []);
 
   // Primer useEffect: Obtener el ID de la hoja de partidos
   useEffect(() => {
@@ -204,6 +195,17 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* Inserta el logo utilizando la importación */}
+      <img
+        src={LogoImage}
+        alt="Logo de Crews"
+        className="app-logo"
+        onError={(e) => {
+          e.target.onerror = null;
+          e.target.src =
+            "https://placehold.co/150x50/white/black?text=Error%20Logo";
+        }}
+      />
       <h1 className="main-app-title">Marcadores de la Jornada</h1>
       <div className="match-list pure-g">
         {sheetNames.map((sheetName) => (
@@ -211,7 +213,6 @@ function App() {
             key={sheetName}
             matchSheetId={matchSheetId}
             matchSheetName={sheetName}
-            // activeHighlight y triggerGlobalHighlight ELIMINADOS de aquí
           />
         ))}
       </div>
