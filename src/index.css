@@ -18,5 +18,5 @@ body {
     align-items: center;
     min-height: 100vh;
     background: #060c21;
-background: linear-gradient(155deg,rgba(6, 12, 33, 1) 0%, rgba(163, 83, 237, 1) 100%);
+    background: linear-gradient(155deg,rgb(50, 1, 71) 0%, rgba(163, 83, 237, 1) 100%);
 }
