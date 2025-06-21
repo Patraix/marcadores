@@ -3,19 +3,16 @@ import React, { useEffect, useState } from "react";
 import "./MatchDisplay.css";
 import { CiStreamOn } from "react-icons/ci"; // Icono de "Stream On"
 
-const MatchDisplay = ({ data, error, matchName }) => {
+const MatchDisplay = ({ data, error }) => {
   // Console log para depuración (puedes mantenerlo o quitarlo)
   console.log("MatchDisplay: Data prop received from hook:", data);
   console.log("MatchDisplay: Error prop received from hook:", error);
 
   const [lastValidData, setLastValidData] = useState(null);
-  // Reintroducimos los estados locales para controlar el resaltado de cada marcador
   const [highlightLocal, setHighlightLocal] = useState(false);
   const [highlightVisitor, setHighlightVisitor] = useState(false);
 
   // Efecto para actualizar lastValidData solo cuando 'data' es válido y sin errores.
-  // Esto asegura que 'lastValidData' siempre retenga la última versión buena del marcador,
-  // incluso si la siguiente petición falla o está en curso.
   useEffect(() => {
     if (data && !error) {
       setLastValidData(data);
@@ -24,82 +21,107 @@ const MatchDisplay = ({ data, error, matchName }) => {
 
   // Efecto para el resaltado del marcador local
   useEffect(() => {
-    // Si la bandera 'changedScores.local' está en los datos, activa el resaltado
     if (data?.mainScore?.changedScores?.local) {
       setHighlightLocal(true);
-      // Configura el temporizador para que el resaltado (marco y parpadeo) dure 30 segundos (30000 ms)
       const timer = setTimeout(() => setHighlightLocal(false), 30000);
-      return () => clearTimeout(timer); // Limpia el temporizador si el componente se desmonta o el efecto se re-ejecuta
+      return () => clearTimeout(timer);
     }
-  }, [data?.mainScore?.localScore, data?.mainScore?.changedScores?.local]); // Dependencias: marcador y bandera de cambio
+  }, [data?.mainScore?.localScore, data?.mainScore?.changedScores?.local]);
 
   // Efecto para el resaltado del marcador visitante
   useEffect(() => {
-    // Si la bandera 'changedScores.visitor' está en los datos, activa el resaltado
     if (data?.mainScore?.changedScores?.visitor) {
       setHighlightVisitor(true);
-      // Configura el temporizador para que el resaltado (marco y parpadeo) dure 30 segundos (30000 ms)
       const timer = setTimeout(() => setHighlightVisitor(false), 30000);
-      return () => clearTimeout(timer); // Limpia el temporizador si el componente se desmonta o el efecto se re-ejecuta
+      return () => clearTimeout(timer);
     }
-  }, [data?.mainScore?.visitorScore, data?.mainScore?.changedScores?.visitor]); // Dependencias: marcador y bandera de cambio
+  }, [data?.mainScore?.visitorScore, data?.mainScore?.changedScores?.visitor]);
 
   // Lógica de renderizado ajustada para mostrar siempre la estructura
-  // Se usan valores por defecto si 'lastValidData' es null (primera carga sin caché, o error persistente)
   const { mainScore, matchStatus, comments } = lastValidData || {};
 
-  // Aseguramos que los objetos anidados y arrays estén definidos para evitar errores de acceso a propiedades
   const displayMainScore = mainScore || {};
   const displayMatchStatus = matchStatus || {};
   const displayComments = comments || [];
 
+  // Función para construir la URL del logo
+  const getTeamLogoPath = (teamName) => {
+    if (!teamName) return ""; // No logo if no team name
+    const fileName = teamName.toLowerCase().replace(/\s+/g, "") + ".png"; // Convertir a minúsculas y quitar espacios
+    // Ruta relativa desde components/ a assets/logos/
+    return new URL(`../assets/logos/${fileName}`, import.meta.url).href;
+  };
+
+  // Handler para errores de carga de imagen (oculta la imagen rota)
+  const handleLogoError = (e) => {
+    e.target.onerror = null; // Evita bucles infinitos de error
+    e.target.style.display = "none"; // Oculta la imagen si no se carga
+    console.error(`Error loading logo for ${e.target.alt}: ${e.target.src}`);
+  };
+
   return (
     <div className="match-container">
-      {/* Título del partido: Muestra los nombres de los equipos. */}
       <h1 className="match-title">
         {displayMainScore.localTeam || "Local"} vs{" "}
         {displayMainScore.visitorTeam || "Visitante"}
       </h1>
 
-      {/* Indicador "LIVE" - siempre visible */}
       <div className="live-indicator">
         <CiStreamOn className="live-icon" />
         <span className="live-text">MARCADOR EN VIVO</span>
       </div>
 
-      {/* Nombres de los equipos */}
-      <div className="teams">
-        <span className="team-name">
-          {displayMainScore.localTeam || "Equipo Local"}
-        </span>
-        <span className="separator">-</span>
-        <span className="team-name">
-          {displayMainScore.visitorTeam || "Equipo Visitante"}
-        </span>
-      </div>
+      {/* === NUEVA SECCIÓN DEL MARCADOR: Dos líneas, una por equipo === */}
+      <div className="score-display-new">
+        {/* Línea del equipo Local: Nombre, Logo, Resultado */}
+        <div className="team-score-line">
+          <div className="team-info">
+            <span className="team-name">
+              {displayMainScore.localTeam || "Equipo Local"}
+            </span>
+            <img
+              src={getTeamLogoPath(displayMainScore.localTeam)}
+              alt={`${displayMainScore.localTeam} logo`}
+              className="team-logo"
+              onError={handleLogoError}
+            />
+          </div>
+          <span
+            className={`score-number ${
+              highlightLocal ? "highlight-score" : ""
+            }`}
+          >
+            {displayMainScore.localScore !== undefined
+              ? displayMainScore.localScore
+              : "-"}
+          </span>
+        </div>
 
-      {/* Sección del marcador */}
-      <div className="score">
-        {/* Marcador Local: aplica la clase highlight-score si highlightLocal es true */}
-        <span
-          className={`score-number ${highlightLocal ? "highlight-score" : ""}`}
-        >
-          {displayMainScore.localScore !== undefined
-            ? displayMainScore.localScore
-            : "-"}
-        </span>
-        <span className="score-separator">:</span>
-        {/* Marcador Visitante: aplica la clase highlight-score si highlightVisitor es true */}
-        <span
-          className={`score-number ${
-            highlightVisitor ? "highlight-score" : ""
-          }`}
-        >
-          {displayMainScore.visitorScore !== undefined
-            ? displayMainScore.visitorScore
-            : "-"}
-        </span>
+        {/* Línea del equipo Visitante: Nombre, Logo, Resultado */}
+        <div className="team-score-line">
+          <div className="team-info">
+            <span className="team-name">
+              {displayMainScore.visitorTeam || "Equipo Visitante"}
+            </span>
+            <img
+              src={getTeamLogoPath(displayMainScore.visitorTeam)}
+              alt={`${displayMainScore.visitorTeam} logo`}
+              className="team-logo"
+              onError={handleLogoError}
+            />
+          </div>
+          <span
+            className={`score-number ${
+              highlightVisitor ? "highlight-score" : ""
+            }`}
+          >
+            {displayMainScore.visitorScore !== undefined
+              ? displayMainScore.visitorScore
+              : "-"}
+          </span>
+        </div>
       </div>
+      {/* === FIN NUEVA SECCIÓN DEL MARCADOR === */}
 
       {/* Fecha y hora del partido */}
       <p className="match-datetime">
